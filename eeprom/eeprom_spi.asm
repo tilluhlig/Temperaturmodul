@@ -21,9 +21,9 @@ sbi CS3_PORT, CS3_PIN
 ldi r16, (1<<SPE) | (1<<MSTR)  ;| (1<<SPR0) | (1<<SPR1)
 out SPCR , r16
 
-in r16, SPSR
-ori r16, (1<<SPI2X)
-out SPSR, r16
+//in r16, SPSR
+//ori r16, (1<<SPI2X)
+//out SPSR, r16
 ret
 
 
@@ -35,8 +35,11 @@ ret
 eeprom_write:
 out SPDR, r16
 Wait_Transmit:
-sbis SPSR, SPIF
+//in r16, SPSR
+//sbrs r16, SPIF
+bbis SPSR, SPIF, sprung2
 rjmp Wait_Transmit
+sprung2:
 ret
 
 
@@ -196,15 +199,17 @@ eeprom_end_write:
 //rcall wait5ms
 rcall eeprom_ende
 rcall wait5ms
+rcall wait5ms
 //rcall wait5ms
 
-/*rcall eeprom_start
-ldi r16, 0b00000100
-rcall eeprom_write
-rcall eeprom_ende
+//rcall wait5ms
+//rcall eeprom_start
+//ldi r16, 0b00000100
+//rcall eeprom_write
+//rcall eeprom_ende
 
-rcall wait5ms
-rcall wait5ms*/
+//rcall wait5ms
+//rcall wait5ms
 
 //pop r16
 ret

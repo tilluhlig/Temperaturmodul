@@ -14,8 +14,8 @@ push r21
 push r23
 push r22
 
-ldi r16, 7
-sts eeprom_blockgroesse, r16
+//ldi r16, 7
+//sts eeprom_blockgroesse, r16
 
 // alles zurücksetzen
 ssn eeprom_anfang_id, 1
