@@ -32,9 +32,9 @@ namespace eeporm_tool
             InitializeComponent();
             comboBox2.SelectedIndex = 4;
 
-            for (int i = 0; i <= 255; i++)
+            for (int i = 0; i <= 20; i++)
             {
-                port = new SerialPort("COM"+Convert.ToInt32(i), 62500, Parity.None,8, StopBits.One);
+                port = new SerialPort("COM" + Convert.ToInt32(i), 62500, Parity.None, 8, StopBits.One);
                 try
                 {
                     port.Open();
@@ -53,6 +53,11 @@ namespace eeporm_tool
             }
             else
                 Application.Exit();
+
+            if (comboBox3.Items.Count > 0)
+            {
+                comboBox3.SelectedIndex = 0;
+            }
         }
 
         private void anzeigen()
@@ -265,18 +270,37 @@ namespace eeporm_tool
               temp3[0] = (byte)(seiten); port.Write(temp3, 0, 1); System.Threading.Thread.Sleep(10);
               temp3[0] = seitengroesse; port.Write(temp3, 0, 1); System.Threading.Thread.Sleep(10);
 
-        
-            int empf=0;
+                        int empf=0;
             int gute = 0;
             byte result=0;
-            while (result != 'O' && result != 'F')
-            {
-                result = (byte)port.ReadByte();
-                if (result == 'S') empf++;
-                  if (result == 'T') gute++;
-                  label10.Text = "geschrieben: " + empf.ToString() + "/" + seiten.ToString() + "\ngelesen: " + gute.ToString() + "/" + seiten.ToString();
-                label10.Refresh();
-              
+            int bekommen = 0;
+        bool ende=false;
+            while (bekommen<seiten*2 && !ende){
+                byte[] res = new byte[100];
+                int h = 0;
+                int anz = 0;
+                try{
+                h = port.BytesToRead; if (h > 100) h = 100;
+                anz = port.Read(res, 0, h);
+                   }
+                catch (Exception)
+                {
+                }
+                bekommen += anz;
+
+                for (int i = 0; i < anz; i++)
+                {
+                    result = res[i];
+                    if (result == 'O' || result == 'F') { ende = true; break; }
+
+                  
+                        if (result == 'S') empf++;
+                        if (result == 'T') gute++;
+                        label10.Text = "geschrieben: " + empf.ToString() + "/" + seiten.ToString() + "\ngelesen: " + gute.ToString() + "/" + seiten.ToString();
+                        label10.Refresh();
+
+                  
+                }
             }
 
             if (result == 'O')
@@ -284,7 +308,9 @@ namespace eeporm_tool
                 label10.Text="OK\n"+label10.Text;
             }
             else
-                label10.Text = "Schlecht\n+" + label10.Text;
+                label10.Text = "Schlecht\n" + label10.Text;
+            
+        
 
         }
 
@@ -451,6 +477,7 @@ namespace eeporm_tool
         int blockgroesse = 0;
         int bloecke = 0;
         int sensoren = 0;
+        int zeitintervall = 0;
         List<UInt64> result = new List<UInt64>();
         private void button3_Click(object sender, System.EventArgs e)
         {
@@ -471,6 +498,7 @@ namespace eeporm_tool
           //  bool read = true;
                 try
                 {
+                    zeitintervall = port.ReadByte();
                     blockgroesse = port.ReadByte();
                     sensoren = (blockgroesse * 8) / 11;
                     bloecke = ReadDrei();
@@ -743,6 +771,7 @@ namespace eeporm_tool
             file.WriteLine(blockgroesse.ToString());
             file.WriteLine(bloecke.ToString());
             file.WriteLine(sensoren.ToString());
+            file.WriteLine(zeitintervall.ToString());
 
             int anfang = 0;
             for (; anfang < result.Count; anfang++)
@@ -795,6 +824,7 @@ namespace eeporm_tool
             blockgroesse = Convert.ToInt32(file.ReadLine());
             bloecke = Convert.ToInt32(file.ReadLine());
             sensoren = Convert.ToInt32(file.ReadLine());
+            zeitintervall = Convert.ToInt32(file.ReadLine());
             result.Clear();
 
             while (!file.EndOfStream)
@@ -808,6 +838,54 @@ namespace eeporm_tool
             for (int i = 0; i < sensoren; i++)
                 checkedListBox1.Items.Add("Sensor " + (i + 1).ToString());
             checkedListBox1.Show();
+        }
+
+
+        int anzahl = 0;
+        String S14 = "";
+        String S15 = "";
+        String S16 = "";
+        private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+             
+            port.DiscardInBuffer();
+
+            //while (port.ReadByte() != 'M') { }
+            while (port.ReadByte() != 'M') { }
+
+            DateTime begin = DateTime.Now;
+            DateTime Jetzt = DateTime.Now;
+            for (int i = 0; i < anzahl; i++)
+            {
+                try
+                {
+                    port.ReadByte();
+                    Jetzt = DateTime.Now;
+                    S14 = Convert.ToString(i + 1);
+                    TimeSpan temp = Jetzt - begin;
+                    S15 = Convert.ToString(temp.Hours).PadLeft(2, '0') + ":" + Convert.ToString(temp.Minutes).PadLeft(2, '0') + ":" + Convert.ToString(temp.Seconds).PadLeft(2, '0') + ":" + Convert.ToString(temp.Milliseconds).PadLeft(3, '0');
+                    temp = new TimeSpan((Jetzt - begin).Ticks / (i + 1));
+                    S16 = Convert.ToString(temp.Hours).PadLeft(2, '0') + ":" + Convert.ToString(temp.Minutes).PadLeft(2, '0') + ":" + Convert.ToString(temp.Seconds).PadLeft(2, '0') + ":" + Convert.ToString(temp.Milliseconds).PadLeft(3, '0');
+                }
+                catch (Exception)
+                {
+
+                }
+                }
+        }
+
+        private void button8_Click(object sender, System.EventArgs e)
+        {
+            anzahl = Convert.ToInt32(comboBox3.Text);
+            timer2.Enabled = true;
+            backgroundWorker1.RunWorkerAsync();
+        }
+
+        private void timer2_Tick(object sender, System.EventArgs e)
+        {
+            label14.Text = S14;
+                label15.Text = S15;
+                label16.Text = S16;
         }
 
 
