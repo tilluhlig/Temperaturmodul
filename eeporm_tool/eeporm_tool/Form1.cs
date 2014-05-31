@@ -378,9 +378,10 @@ namespace eeporm_tool
                                "A Blöcke pro Seite",
                                "B Blöcke pro Seite",
                                "C Blöcke pro Seite",                              
-                               "D Blöcke pro Seite"
+                               "D Blöcke pro Seite",                              
+                               "Zeitintervall"
                              };
-
+            String[] Intervalle = { "1s", "5s","10s","30s","60s","150s","5m","10m","15m","30m","60m","90m","2h","6h","12h","24h"};
             try
             {
                 port.ReadExisting();
@@ -423,6 +424,12 @@ namespace eeporm_tool
                 listBox1.Items.Add(Texte[23] + ": " + Convert.ToString(port.ReadByte()));
                 listBox1.Items.Add(Texte[24] + ": " + Convert.ToString(port.ReadByte()));
                 listBox1.Items.Add(Texte[25] + ": " + Convert.ToString(port.ReadByte()));
+                listBox1.Items.Add(("").PadLeft(breite, '-'));
+                int a = port.ReadByte();
+                String Text = "unbekannt";
+                if (a>0)
+                    Text =  Intervalle[a-1];
+                listBox1.Items.Add(Texte[26] + ": " + Text);
             }
             catch (Exception) { listBox1.Items.Add("Fehler..."); listBox1.Refresh(); }
 
