@@ -769,7 +769,7 @@ rcall send_register
 sbi (SENSOR_V_PORT),(SENSOR_V_PIN)
 lds r23, Sensor_Anzahl
 rcall wait5ms2
-/*
+
 cpi r23, 1
 brlo no1
 rcall sensor_abfragen
@@ -793,7 +793,7 @@ no4:
 cpi r23, 5
 brlo no5
 rcall sensor_abfragen5
-no5:*/
+no5:
 
 rcall speichern
 
