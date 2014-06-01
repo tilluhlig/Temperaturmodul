@@ -1,0 +1,250 @@
+\documentclass[10pt,a4paper,final]{scrartcl}
+\setlength{\parindent}{0pt}
+\usepackage[utf8]{inputenc}
+\usepackage[german]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{lmodern}
+\usepackage{paralist}
+\usepackage{color}
+\usepackage{tabularx} % für die erweiterten tabular Funktionen
+% \usepackage{multirow}
+% \usepackage{morefloats}
+ 
+\usepackage{listings,xcolor}
+%\usepackage{inconsolata}
+% Farben definieren
+\usepackage{xcolor}
+\definecolor{codeGray}{RGB}{240,240,240}
+\definecolor{codeBlack}{RGB}{0,0,0}
+\definecolor{codeRed}{RGB}{221,0,0}
+\definecolor{codeBlue}{rgb}{0,0,187}
+\definecolor{codeYellow}{RGB}{255,128,0}
+\definecolor{codeGreen}{RGB}{0,119,0}
+
+\newcommand{\blau}[1]{\textcolor{blue}{#1}}
+% zum erzeugen von "todo" Zeilen
+\newcommand{\todo}[1]{\colorbox{yellow}{\parbox{\textwidth}{Todo: \textbf{#1}}}}
+
+\newenvironment{Bilder}
+  {\par\raggedbottom\null\noindent\minipage{\textwidth}\centering}
+  {\endminipage\vspace{0.7cm}}
+  
+\newcommand{\bild}[3]{
+\begin{Bilder}
+ \fbox{\includegraphics[width=.75\textwidth]{Images/#1}}
+	\captionof{figure}{#2}
+	\label{#3}
+	\end{Bilder}
+}
+
+\newcommand{\dbild}[3]{
+\begin{Bilder}
+ \fbox{\includegraphics[width=\textwidth]{Images/#1}}
+	\captionof{figure}{#2}
+	\label{#3}
+	\end{Bilder}
+}
+
+
+% … und zuweisen
+\lstset{%
+    language=PHP,%
+    %
+    % Farben, diktengleiche Schrift
+    backgroundcolor={\color{codeGray}},% 
+    basicstyle={\small\ttfamily\color{codeGreen}},% 
+    commentstyle={\color{codeYellow}},%
+    keywordstyle={\color{codeBlue}},%
+    stringstyle={\color{codeRed}},%
+    identifierstyle={\color{codeBlue}},%
+    %
+    % Zeilenumbrüche aktivieren, Leerzeichen nicht hervorheben    
+    breaklines=true,%
+    showstringspaces=false,%
+    % 
+    % Listing-Caption unterhalb (bottom)
+    captionpos=b,%
+    % 
+    % Listing einrahmen
+    frame=single,%
+    rulecolor={\color{codeBlack}},%
+    % 
+    % winzige Zeilennummern links
+   % numbers=left,%
+ %   numberstyle={\tiny\color{codeBlack}}%
+}
+
+\newenvironment{php}
+{\begin{minipage}{\textwidth}
+\begin{lstlisting}}
+{\end{lstlisting}
+\end{minipage}}
+
+\newenvironment{beispiel}
+{\begin{minipage}{\textwidth}
+Beispiel
+\begin{lstlisting}}
+{\end{lstlisting}
+\end{minipage}}
+
+\title{Temperaturmodul}
+\subtitle{Benutzerhandbuch}
+\date{\today}
+\author{Till Uhlig}
+
+\begin{document}
+
+
+%\section*{}
+\maketitle \thispagestyle{empty}
+\cleardoublepage
+\mbox{} \thispagestyle{empty} \clearpage
+
+\tableofcontents \thispagestyle{empty}
+\cleardoublepage
+\mbox{} \thispagestyle{empty}
+
+\clearpage
+\addtocounter{page}{-4}
+\section{Das Modul öffnen}
+\bild{Bild15.jpg}{das Trennen der beiden Gehäusehälften}{Aufschrauben}
+\bild{Bild25.jpg}{das aufgeschraubte Modul}{ModulOffen}
+\bild{Bild11.jpg}{das Trennen der beiden Gehäusehälften}{Strombuchse3}
+
+\clearpage
+\section{Bauteile}
+\subsection{Quarz}
+\bild{Bild1_2.png}{Mini Uhrenquarz, 32.768 kHz}{Uhrenquarz}
+\bild{Bild3_7.png}{Mini Uhrenquarz, 32.768 kHz}{Uhrenquarz2}
+Dieser externe Taktgeber weckt den in Abbildung \ref{Atmega} dargestellten Prozessor in regelmäßigen Abständen. Dabei war die Verwendung eines externen 32 kHz Quarzes ein wesentlicher Schritt zur Senkung des Energieverbrauchs des Temperaturmoduls, zu sehen in Abbildung \ref{Strom}.  
+
+\clearpage
+\subsection{EEPROM Slots}
+\bild{Bild2_2.png}{EEPROM Slots}{EEPROMSlots}
+\bild{Bild14_2.png}{EEPROM Slots}{EEPROMSlots2}
+Hier können verschiedene 8 Pin SPI EEPROMs eingesetzt werden, dabei können auch Slots freigelassen werden. Das System erkennt, bei der neuen Erstellung der Speicherverwaltung die Anzahl und Art der EEPROMs selbst. Es wurden 64kBit, 512kBit und 1024kBit EEPROMs getestet.
+
+\clearpage
+\subsection{Spannungsteiler}
+\bild{Bild2_9.png}{3.3V Spannungsteiler mit 160mA}{Spannungsteiler}
+
+\clearpage
+\subsection{Prozessor}
+\bild{Bild2_3.png}{die Steuerung, ATMEGA 88V-10 PU, Speicher: 8 kByte, SRAM: 1 kByte, EEPROM: 512 Byte}{Atmega}
+Der in Abbildung \ref{Atmega} gezeigte Atmega 88V stellt als stromsparende Variante des Atmega 88 die zentrale Steuereinheit dar. Der Atmega wird über SPI mittels des Programmieranschlusses aus Abbildung \ref{SPI} beschrieben.
+
+\clearpage
+\subsection{Status LED}
+\bild{Bild3_5.png}{die Grüne 5mm standard LED, für Statusinformationen}{GrueneLED} Dabei signalisiert die LED zu Beginn, dass das Modul startet und nach dem Ablauf der 30s Wartefrist (für die Verbindung mit dem PC), dass das Modul den Messvorgang startet.
+
+\clearpage
+\subsection{Sensoren und Blenden}
+\bild{Bild37.jpg}{langer Temperatursensor (1m)}{Sensor}
+\bild{Bild41.jpg}{kurzer Sensor}{Sensor3}
+\bild{Bild42.jpg}{Blende}{Blende}
+Die Blende aus Abbildung \ref{Blende} kann genutzt werden, wenn ein Sensorslot nicht genutzt wird, um diesen zu verschließen. Darüber hinaus, hat die Blende keine Funktion.
+
+\clearpage
+\subsection{USB/UART Modul}
+\bild{Bild2_8.png}{das UART/USB Modul, mit XBEE Slot}{USB}
+\bild{Bild3_6.png}{das UART/USB Modul, mit XBEE Slot}{USB2}
+Das in Abbildung \ref{USB} und Abbildung \ref{USB2} dargestellte Modul enthält einen USB Treiber um das Temperaturmodul wahlweise mit dem PC direkt über USB zu verbinden oder aber die Verbindung durch ein optionales XBEE Modul einzurichten.
+
+\bild{Bild47.jpg}{der USB Slot von außen}{USB3}
+
+Wenn man ein XBEE Modul (Abbildung \ref{XBEESlot})nutzen möchte, muss der Jumper aus Abbildung \ref{UARTWechsel} entsprechend eingestellt werden, um UART Anschlüsse des Atmega 88 in Abbildung \ref{Atmega} richtig mit dem USB Modul zu verbinden. Des weiteren regelt das Modul die 5V des USB Anschlusses auf die 3.3V des Temperaturmoduls herunter.
+
+\clearpage
+	\subsubsection{XBEE Modul Slot}
+	\bild{Bild8_2.png}{XBEE Modul Slot}{XBEESlot}
+	
+	\clearpage
+	\subsubsection{USB Anschluss}
+	\bild{Bild8_3.png}{USB Anschluss für die Verbindung mit dem PC}{USB}
+	
+	\clearpage
+	\subsubsection{UART Jumper}
+	\bild{Bild3_9.png}{Jumper zum Wechseln der UART Anschlüsse zwischen Modul und USB Modul}{UARTWechsel}
+	\bild{Bild8_4.png}{Jumper zum Wechseln der UART Anschlüsse zwischen Modul und USB Modul}{UARTWechsel2}
+	
+\clearpage
+\subsection{SPI Programmieranschluss}
+\bild{Bild2_6.png}{der SPI Programmieranschluss}{SPI}
+\bild{Bild3_3.png}{der SPI Programmieranschluss}{SPI2}
+Das Modul kann über einen 6 Poligen Anschluss Programmiert werden. Beachten Sie dabei, vor dem Programmieren alle EEPROMs in Abbildung \ref{EEPROMSlots} aus dem Modul zu entfernen, um Schäden an den EEPROMs zu vermeiden. 
+
+\bild{Bild48.jpg}{der SPI Programmieranschluss von außen}{SPI3}
+
+\clearpage
+\subsection{Stromversorgungsschalter}
+\bild{Bild2_5.png}{der Schalter zum Einschalten des Temperaturmoduls}{Schalter}
+\bild{Bild3_8.png}{der Schalter zum Einschalten des Temperaturmoduls}{Schalter2}
+\bild{Bild30_2.png}{der Schalter zum Einschalten des Temperaturmoduls}{Schalter3}
+Dieser Schalter trennt die externe Stromversorgung vom Modul.
+
+\clearpage
+\subsection{Sensoren Anschlüsse}
+\bild{Bild2_4.png}{die Anschlüsse für die Sensoren, Klinkenbuchse, 3.5mm, Print mit Schaltkontakt}{SensorenSlots}
+\bild{Bild3_4.png}{die Anschlüsse für die Sensoren, Klinkenbuchse, 3.5mm, Print mit Schaltkontakt}{SensorenSlots2}
+Sensoren können mit entsprechenden 3 Poligen, 3.5mm Klinkensteckern in die, in Abbildung \ref{SensorenSlots} und Abbildung \ref{SensorenSlots2} dargestellten Klinkenbuchsen eingesteckt und damit genutzt werden. Beachten Sie dabei,das Temperaturmodul vom Strom zu trennen, zum einsetzen und entnehmen der Sensoren. 
+
+Zudem ist zu beachten, bei einer Veränderung der Anzahl der genutzten Sensoren, die Speicherverwaltung des Temperaturmoduls entsprechend anzupassen. Dabei kann der Speicher stets für mehr Sensoren angelegt sein, als dann genutzt werden, andersrum funktioniert es nicht.
+
+\bild{Bild46.jpg}{eingesteckte Sensoren und Blende}{Sensor4}
+
+\clearpage
+\subsection{Steckbuchse für Gehäuseverbindung}
+\bild{Bild2_7.png}{Steckbuchse für die Anbindung der externen Stromversorgung}{Strombuchse}
+\bild{Bild5_2.png}{Steckbuchse für die Anbindung der externen Stromversorgung}{Strombuchse2}
+Die in Abbildung \ref{Strombuchse} und Abbildung \ref{Strombuchse2} dargestellte Buchse verbindet das gesamte Modul mit dem Gehäuse beziehungsweise der externen Stromversorgung.
+
+\clearpage
+\subsection{Auswahlschalter für Messintervalle}
+\bild{Bild3_2.png}{Auswahlschalter zum festlegen des Messintervalls}{Intervall}
+\bild{Bild20_2.png}{Auswahlschalter zum festlegen des Messintervalls}{Intervall2}
+Sie können die Messintervalle mit dem in Abbildung \ref{Intervall} und Abbildung \ref{Intervall} dargestellten Regler anpassen. 
+
+Nutzen Sie dazu die in Abbildung \ref{Intervalltafel3} dargestellte Schalttafel. Wenn Sie das Intervall verändert haben, muss das Modul zunächst neu gestartet werden, bevor eine Änderung wirksam wird. Am besten ist es jedoch, eine Änderung des Intervalls nur bei ausgeschaltetem Modul vorzunehmen, um Schäden zu vermeiden.
+
+\bild{Bild22_2.png}{die Intervall-tafel für den Auswahlschalter}{Intervalltafel3}
+Schwarz stellt dabei die Schalterposition dar.
+
+\clearpage
+\section{Stromversorgung}
+Zur Versorgung des Moduls gibt es eine Reihe von Möglichkeiten, dabei ist zu sagen, das auch weitere Mögliche Quellen über den Block Clipanschluss angeschlossen werden können (von 3.3V bis 24V).
+
+\bild{Bild36.jpg}{4x Mignon}{Mignon}
+\bild{Bild49.jpg}{3x Mono}{Mono}
+Das Modul aus Abbildung \ref{Mono} wird auf der Rückseite des Temperaturmoduls verschraubt, achten Sie dabei darauf, die Gegenstücke im inneren des Temperaturmoduls nicht abzubrechen, um einen Defekt des Temperaturmoduls zu vermeiden.
+
+\bild{Bild32.jpg}{1x 9V Block}{Block}
+
+\clearpage
+\section{Daten auslesen}
+\bild{InnenAussen.jpg}{Beispielmessung der Innen- und Außentemperatur, mit eingezeichneter Messunterbrechung}{InnenAussen}
+
+\clearpage
+\section{Kenngrößen}
+\dbild{Kenndaten.png}{Ausgelesene Kenndaten des Temperaturmoduls}{Kenndaten}
+\dbild{10MinutenZeitintervall.png}{Zeitmessung für ein 10 Minuten Intervall}{10MinutenZeitintervall}
+\dbild{Ergebnis3.jpg}{Entwicklung des Stromverbrauchs}{Strom}
+
+\clearpage
+\section{Datenspeicher einrichten}
+Die Datenstruktur zum speichern der Messwerte kann in der Software im Register "Datenstruktur anlegen" angelegt werden. Wählen Sie dort die Anzahl der Sensoren, die das Modul unterstützen soll (mehr Sensoren bedeutet weniger Messpunkte) und legen Sie dann die Datenstruktur an.
+
+\clearpage
+\section{EEPROM Testmodul}
+\bild{Bild24.jpg}{das EEPROM Testmodul (oben)}{Testmodul}
+\bild{Bild27.jpg}{das EEPROM Testmodul (unten)}{Testmodul2}
+Dieses Modul wurde entwickelt um die Kenngrößen von 8 Pin SPI EEPROMs zu bestimmen. Dabei arbeitet das Modul experimentierend bei der Ermittlung der Daten, da die EEPROMs selbst keinerlei Informationen über sich selbst Preisgeben. Zudem kann geprüft werden, ob das EEPROM noch korrekt Arbeitet. Zu Beachten ist, das hierbei Schreibvorgänge vorgenommen werden, die natürlich die Lebenszeit des EEPROM verkürzen.
+
+
+
+
+
+
+\end{document}
