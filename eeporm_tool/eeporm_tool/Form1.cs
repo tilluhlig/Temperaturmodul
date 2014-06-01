@@ -607,6 +607,8 @@ namespace eeporm_tool
         private void timer1_Tick(object sender, System.EventArgs e)
         {
             timer1.Enabled = false;
+            String[] Intervalle = { "1s", "5s", "10s", "30s", "60s", "150s", "5m", "10m", "15m", "30m", "60m", "90m", "2h", "6h", "12h", "24h" };
+            double[] ZeitIntervalle = { 1 / 60.0, 5 / 60.0, 10 / 60.0, 30 / 60.0, 60 / 60.0, 150 / 60.0, 300 / 60.0, 600 / 60.0, 900 / 60.0, 1800 / 60.0, 3600 / 60.0, 5400 / 60.0, 7200 / 60.0, 21600 / 60.0, 43200 / 60.0, 86400 / 60.0 };
 
             int anfang = 0;
             for (; anfang < result.Count; anfang++)
@@ -628,9 +630,9 @@ namespace eeporm_tool
 
                 Series werte = new Series("Sensor " + (z + 1).ToString());
                 werte.ChartType = SeriesChartType.Spline;
-                
 
-                int zeit = 10;
+
+                double zeit = ZeitIntervalle[zeitintervall];
                 float last = 0;
                 bool abstand = false;
                 int aktiv = 1;
@@ -660,7 +662,7 @@ namespace eeporm_tool
                                // werte.Points.AddXY(zeit - 10, last);
                                 abstand = true;
                                 aktiv = 1;
-                                zeit += 10;
+                                zeit += ZeitIntervalle[zeitintervall];
                             }
                         }
                         else
@@ -675,7 +677,7 @@ namespace eeporm_tool
                                 {
                                    
                                     int begin = werte.Points.Count - 1;
-                                    for (int q = zeit - 10; q <= zeit; q+=10)
+                                    for (double q = zeit - ZeitIntervalle[zeitintervall]; q <= zeit; q += ZeitIntervalle[zeitintervall])
                                     {
                                         werte.Points.AddXY(q, last);
                                         if (werte.Points.Count - 2!=begin) werte.Points[werte.Points.Count - 1].Color = Color.Red;
@@ -706,7 +708,7 @@ namespace eeporm_tool
                                     werte.Points[werte.Points.Count - 1].Color = Color.Red;
                                     abstand = false;
                                     last = dat;
-                                    zeit += 10;                       
+                                    zeit += ZeitIntervalle[zeitintervall];                       
                                 }
                                 else
                                     if (aktiv==0)
@@ -714,7 +716,7 @@ namespace eeporm_tool
                                         werte.Points.AddXY(zeit, dat);
                                         abstand = false;
                                         last = dat;
-                                        zeit += 10;
+                                        zeit += ZeitIntervalle[zeitintervall];
                                     }
 
                                                
