@@ -117,22 +117,13 @@ rcall eeprom_select
 lds r16, eeprom_blockseite
 cpi r16, 0
 breq eeprom_finde_neuen_ende
-
-cpi r16, 4
-brlo auswahl_ok
-subi r16, 4
-sts eeprom_id, r16
-auswahl_ok:
+lds r16, eeprom_id
 ret
 
 eeprom_finde_neuen_ende:
-lds r16, eeprom_id
-inc r16
-sts eeprom_id, r16
-cpi r16, 8
-breq over_finde_neuen_chip
+ars eeprom_id, 1, EINS
 rjmp finde_neuen_chip
-over_finde_neuen_chip:
+
 
 ret
 

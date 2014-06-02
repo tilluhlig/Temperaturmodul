@@ -1,6 +1,6 @@
 .equ SENSOR_ID = 0b00100000   // 1 - 15
 
-.include "m88def.inc"
+//.include "m88def.inc"
 ; REGISTER                                        
 .def NULL     = R10
 .def EINS     = R11
@@ -459,12 +459,12 @@ brne no_send
 
 cpi temp, 'C'
 brne no_send16
+// Datensätze schreiben
 
 ldi r17,0
-
-ldi r19,143
+ldi r19,1
 aussen:
-ldi r18,150
+ldi r18,100
 aussen2:
 
 push r18
@@ -576,8 +576,11 @@ rcall send_register
 dec r23
 brne schleife11
 
-
-    rjmp no_receive
+lds r16, Sensor_Zeitabstand
+inc r16
+rcall send_register
+    
+rjmp no_receive
 no_send8:
 
 no_receive:
