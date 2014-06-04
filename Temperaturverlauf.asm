@@ -709,7 +709,7 @@ ldi r21, 11
 subtrahieren:
 inc r23
 sub r0, r21
-cp r0, r22
+cp r0, r21
 brsh subtrahieren
 sts Sensor_Anzahl, r23
 cpi r23, 0
@@ -764,12 +764,12 @@ messen:
 cli
 
 ldi r16, 'M'
-rcall send_register
-//cbi LED_V_PORT, LED_V_PIN
-//rcall wait500ms
-//sbi LED_V_PORT, LED_V_PIN
+rcall send_register /// DEBUG
 
 sbi (SENSOR_V_PORT),(SENSOR_V_PIN)
+///lds r16, Sensor_Anzahl /// DEBUG
+///rcall send_register /// DEBUG
+
 lds r23, Sensor_Anzahl
 rcall wait5ms2
 
@@ -800,33 +800,22 @@ no5:
 
 rcall speichern
 
-//lds r16, Sensor_Anzahl
-//rcall send_register
-//ldi r16, 'G'
-//rcall send_register
-
 cbi (SENSOR_V_PORT),(SENSOR_V_PIN)
 sbi LED_V_PORT, LED_V_PIN
 
 lds r17, Sensor_Zeitabstand
-//mov r16, r17
-//rcall send_register
 ldi     ZL, LOW(Sensor_Zeiten_Durchgaenge_H*2)        ; Low-Byte der Adresse in Z-Pointer
 ldi     ZH, HIGH(Sensor_Zeiten_Durchgaenge_H*2)
 add ZL, r17
 adc ZH, NULL
 lpm
 sts Sensor_Cooldown, r0
-//mov r16, r0
-//rcall send_register
 ldi     ZL, LOW(Sensor_Zeiten_Durchgaenge_L*2)        ; Low-Byte der Adresse in Z-Pointer
 ldi     ZH, HIGH(Sensor_Zeiten_Durchgaenge_L*2)
 add ZL, r17
 adc ZH, NULL
 lpm
 sts Sensor_Cooldown+1, r0
-//mov r16, r0
-//rcall send_register
 
 sei
 rjmp over_over_messen3
@@ -845,17 +834,6 @@ over_over_messen3:
 
 
 over_messen:
-
-
-
-
-// daten empfangen
-//sbis UCSR0A, RXC0
-//empfangen:
-
-
-//ldi r16, 'U'
-//rcall send_register
 sei
 reti
 
@@ -876,14 +854,16 @@ ldi xl, low(adr_TEMPERATURDATEN_H)
 ldi xh, high(adr_TEMPERATURDATEN_H)
 
 lds r24, Sensor_Anzahl; <- hier wurden manuel festgelegt, das es 5 sensoren sind
-//ldi r24, 5
+///mov r16, r24 /// DEBUG
+///rcall send_register /// DEBUG
+
 sensoren_speichern:
 
 ld r16, x+
-//rcall send_register
+///rcall send_register /// DEBUG
 sts eeprom_speicher, r16
 ld r16, z+
-//rcall send_register
+///rcall send_register /// DEBUG
 sts eeprom_speicher+1, r16
 push zl
 push zh
@@ -901,6 +881,11 @@ pop zl
 
 dec r24
 brne sensoren_speichern
+
+lds r16, eeprom_input
+///rcall send_register /// DEBUG
+lds r16, eeprom_input+1
+///rcall send_register /// DEBUG
 
 rcall eeprom_write_block
 ret

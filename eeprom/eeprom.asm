@@ -123,8 +123,6 @@ ret
 eeprom_finde_neuen_ende:
 ars eeprom_id, 1, EINS
 rjmp finde_neuen_chip
-
-
 ret
 
 
@@ -166,7 +164,7 @@ lds r23, eeprom_blockgroesse
 dec r23
 schreibschleife:
 ld r16, Z+
-//rcall send_register
+///rcall send_register /// DEBUG
 rcall eeprom_write
 dec r23
 brne schreibschleife
@@ -177,8 +175,7 @@ andi r16, 0b11111110
 lds r17, eeprom_anfang_kontrollbit
 andi r17, 1
 or r16, r17
-//ld r16, Z+
-//rcall send_register
+///rcall send_register /// DEBUG
 rcall eeprom_write
 
 rcall eeprom_end_write
