@@ -134,7 +134,7 @@ namespace eeporm_tool
                 try
                 {
                     port = new SerialPort(comboBox1.Text, 62500, Parity.None, 8, StopBits.One);
-                    port.ReadBufferSize = 2500;
+                    port.ReadBufferSize = 100000;
                     port.Open();
                    // port.ReadBufferSize = 100;
                     anzeigen();
@@ -346,6 +346,9 @@ namespace eeporm_tool
 
         private void button4_Click(object sender, System.EventArgs e)
         {
+            port.DiscardInBuffer();
+            port.DiscardOutBuffer();
+
             // Kenndaten ermitteln
             byte befehl = 39;
             byte[] temp = { befehl };
@@ -437,6 +440,9 @@ namespace eeporm_tool
 
         private void button5_Click(object sender, System.EventArgs e)
         {
+            port.DiscardInBuffer();
+            port.DiscardOutBuffer();
+
             // Datenstruktur anlegen
             byte []befehl = {33,34,35,36,37};
             byte[] temp = { befehl[comboBox2.SelectedIndex] };
@@ -486,9 +492,25 @@ namespace eeporm_tool
         int sensoren = 0;
         int zeitintervall = 0;
         List<UInt64> result = new List<UInt64>();
+        List<String> Log = new List<String>();
+
+        public void Log_speichern(String Name)
+        {
+            StreamWriter datei = new StreamWriter("Logs/" + DateTime.Now.Year + "." + DateTime.Now.Month + "." + DateTime.Now.Day + " " + DateTime.Now.Hour + "." +DateTime.Now.Minute+"." + DateTime.Now.Second +"_" + Name + ".log");
+            for (int i = 0; i < Log.Count; i++)
+            {
+                datei.WriteLine(Log[i]);
+            }
+            datei.Close();
+            Log.Clear();
+        }
+
         private void button3_Click(object sender, System.EventArgs e)
         {
-            // Datenstruktur anlegen
+            // Datenstruktur auslesen
+            port.DiscardInBuffer();
+            port.DiscardOutBuffer();
+
             byte befehl = 38;
             byte[] temp = { befehl };
             port.Write(temp, 0, 1);
@@ -502,31 +524,37 @@ namespace eeporm_tool
             label8.Refresh();
             label8.Show();
             port.ReadTimeout = 10000;
+           // port.ReadBufferSize = 10000;
           //  bool read = true;
                 try
                 {
                     zeitintervall = port.ReadByte();
+                    Log.Add("Zeitintervall: " + zeitintervall);
                     blockgroesse = port.ReadByte();
+                    Log.Add("Blockgrösse: " + blockgroesse);
                     sensoren = (blockgroesse * 8) / 11;
+                    Log.Add("Sensoren: " + sensoren);
                     bloecke = ReadDrei();
+                    Log.Add("Blöcke: " + bloecke);
                     label8.Text = "Lese: " + ("").PadLeft((bloecke * blockgroesse).ToString().Length, '0') + "/" + (bloecke * blockgroesse).ToString();
                     label8.Left = tabPage1.Width / 2 - label8.Width / 2;
                     label8.Refresh();
 
+                    Log.Add("<<Originaldaten>>");
                     for (int i = 0; i < bloecke*blockgroesse;)
                     {
-                            byte[] buffer = new byte[100];
-                            int h = port.BytesToRead; if (h > 100) h = 100;
+                            byte[] buffer = new byte[1000];
+                            int h = port.BytesToRead; if (h > 1000) h = 1000;
                             int readed = port.Read(buffer, 0, h);
-                           // byte a = (byte)port.ReadByte();
                             for (int f = 0; f < readed; f++)
+                            {
                                 data.Add(buffer[f]);
+                                Log.Add(((int)buffer[f]).ToString());
+                            }
                             i += readed;
                             label8.Text = "Lese: " + i.ToString().PadLeft((bloecke * blockgroesse).ToString().Length, '0') + "/" + (bloecke * blockgroesse).ToString();
                             label8.Left = tabPage1.Width / 2 - label8.Width / 2;
                             label8.Refresh();
-                     //   else
-                        //    i--;
                     }
                 }
                 catch (Exception)
@@ -552,31 +580,27 @@ namespace eeporm_tool
                             int dieses = data[i] & 1;
                             if (last == dieses)
                             {
-                                anfang = i + 1;
+                                anfang = i - (blockgroesse-1);
                                 break;
                             }
                             last = dieses;
                         }
                     }
                     if (anfang == -1) anfang = 0;
+                    Log.Add("Anfang: " + anfang);
 
                     // daten umsortieren
                     result = new List<UInt64>();
                     int schieb = blockgroesse * 8 - (11 * sensoren);
-                  /*  StreamWriter file = new StreamWriter("out.txt");
-
-                    for (int i = 0; i < (bloecke * blockgroesse); i ++)
-                    {
-                        file.WriteLine(((int)data[i]).ToString());
-                    }
-
-                    file.Close();*/
 
                     for (int i = anfang; i + blockgroesse <= (bloecke * blockgroesse); i += blockgroesse)
                     {
                         UInt64 dat = 0;
                         for (int b = 0; b < blockgroesse; b++)
-                            dat = (UInt64) dat << 8 | (UInt64) data[i + b];
+                        {
+                            dat = (UInt64)dat << 8;
+                            dat |= (UInt64)data[i + b];
+                        }
                         dat = (UInt64) dat >> schieb;
                         result.Add(dat);
                     }
@@ -585,7 +609,10 @@ namespace eeporm_tool
                     {
                         UInt64 dat = 0;
                         for (int b = 0; b < blockgroesse; b++)
-                            dat = (UInt64) dat << 8 | (UInt64) data[i + b];
+                        {
+                            dat = (UInt64)dat << 8;
+                            dat |= (UInt64)data[i + b];
+                        }
                         dat = (UInt64) dat >> schieb;
                         result.Add(dat);
                     }
@@ -597,6 +624,7 @@ namespace eeporm_tool
                 }
 
                 label8.Hide();
+                Log_speichern("Auslesen");
         }
 
         private void checkedListBox1_ItemCheck(object sender, System.Windows.Forms.ItemCheckEventArgs e)
@@ -642,7 +670,7 @@ namespace eeporm_tool
                    // if (result[i] != 0)
                     //{
                         UInt64 messwert = (UInt64)result[i];
-                        for (int b = 0; b < sensoren && b < z && b < 2; b++)
+                        for (int b = 0; b < sensoren && b < z; b++)
                             messwert = (UInt64)messwert >> 11;
 
                         int mess = (UInt16)messwert;
@@ -858,8 +886,8 @@ namespace eeporm_tool
         {
              
             port.DiscardInBuffer();
+            port.DiscardOutBuffer();
 
-            //while (port.ReadByte() != 'M') { }
             while (port.ReadByte() != 'M') { }
 
             DateTime begin = DateTime.Now;
@@ -885,6 +913,9 @@ namespace eeporm_tool
 
         private void button8_Click(object sender, System.EventArgs e)
         {
+            port.DiscardInBuffer();
+            port.DiscardOutBuffer();
+
             anzahl = Convert.ToInt32(comboBox3.Text);
             timer2.Enabled = true;
             backgroundWorker1.RunWorkerAsync();
