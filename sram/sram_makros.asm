@@ -100,30 +100,39 @@ sts @0+6, NULL
     sts @0+1, r4
     sts @0+2, r3
     .endif
-/*
-    .if @1>=1
-mov r5, NULL
-lds r6, @0+@1-1
-add r6, @2
-adc r5, NULL
-sts @0+@1-1, r6
-     .endif
+.endm
 
 
-     .if @1>=2
-mov r4, NULL
-lds r6, @0+@1-2
-add r6, r5
-adc r4, NULL
-sts @0+@1-2, r6
-     .endif
+;#############################################
+;######## Addiert Eins zu SRAM #######
+;#############################################
+.macro IS ; (kd,k)  (SRAM adresse, Anzahl der bytes (maximal 3))
+    .if @1==1
+    lds r3, @0
+    add r3, EINS
+    sts @0, r3
+    .endif
 
+    .if @1==2
+    lds r4, @0
+    lds r3, @0+1
+    add r3,EINS
+    adc r4,NULL
+    sts @0, r4
+    sts @0+1, r3
+    .endif
 
-     .if @1>=3
-lds r6, @0+@1-3
-add r6, r4
-sts @0+@1-3, r6
-     .endif*/
+    .if @1==3
+    lds r5, @0
+    lds r4, @0+1
+    lds r3, @0+2
+    add r3,EINS
+    adc r4,NULL
+    adc r5,NULL
+    sts @0, r5
+    sts @0+1, r4
+    sts @0+2, r3
+    .endif
 .endm
 
 
