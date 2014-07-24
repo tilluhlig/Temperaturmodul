@@ -137,6 +137,33 @@ sts @0+6, NULL
 
 
 ;#############################################
+;######## Verschiebt SRAM in SRAM #######
+;#############################################
+.macro MSS ; (kd,k,kr)  (SRAM adresse, Anzahl der bytes (maximal 3), SRAM adresse)
+    .if @1==1
+    lds r3, @2
+    sts @0, r3
+    .endif
+
+    .if @1==2
+    lds r3, @2
+    sts @0, r3
+    lds r3, @2+1
+    sts @0+1, r3
+    .endif
+
+    .if @1==3
+    lds r3, @2
+    sts @0, r3
+    lds r3, @2+1
+    sts @0+1, r3
+    lds r3, @2+2
+    sts @0+2, r3
+    .endif
+.endm
+
+
+;#############################################
 ;##### Subtrahiert ein Register von SRAM #####
 ;#############################################
 .macro SRS ; (kd,k,Rr)  (SRAM adresse, Anzahl der bytes (maximal 3), zu subtrahierendes Register)
